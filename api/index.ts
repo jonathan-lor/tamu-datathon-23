@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 import express, { Request, Response } from 'express';
 import { createClient } from 'redis';
+import { CourseGraph } from './utils/CourseGraph';
 
 const redisPassword = process.env.REDIS_PASSWORD;
 const app = express();
@@ -37,6 +38,9 @@ app.post('/set', async (req: Request, res: Response) => {
 });
 
 app.get('/get/:key', async (req: Request, res: Response) => {
+    // these index methods should return data to frontend
+    // direct interfacing with redis is for server side calculations only
+
     const { key } = req.params;
     try {
         const value = await client.hGetAll(key);
@@ -60,19 +64,15 @@ app.get('/get/:key', async (req: Request, res: Response) => {
 
 async function startServer() {
     try {
-        // Wait for the Redis client to connect
         await client.connect();
 
-        // Start the Express server
         app.listen(port, () => {
             console.log(`API server started on http://localhost:${port}`);
         });
     } catch (err) {
         console.error("Failed to connect to Redis:", err);
-        process.exit(1);  // Exit the process with an error code
+        process.exit(1);
     }
 }
 
-// Call the function to start the server
 startServer();
-
